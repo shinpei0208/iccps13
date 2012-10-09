@@ -1,0 +1,150 @@
+% THIS IS SIGPROC-SP.TEX - VERSION 3.1
+% WORKS WITH V3.2SP OF ACM_PROC_ARTICLE-SP.CLS
+% APRIL 2009
+%
+% It is an example file showing how to use the 'acm_proc_article-sp.cls' V3.2SP
+% LaTeX2e document class file for Conference Proceedings submissions.
+% ----------------------------------------------------------------------------------------------------------------
+% This .tex file (and associated .cls V3.2SP) *DOES NOT* produce:
+%       1) The Permission Statement
+%       2) The Conference (location) Info information
+%       3) The Copyright Line with ACM data
+%       4) Page numbering
+% ---------------------------------------------------------------------------------------------------------------
+% It is an example which *does* use the .bib file (from which the .bbl file
+% is produced).
+% REMEMBER HOWEVER: After having produced the .bbl file,
+% and prior to final submission,
+% you need to 'insert'  your .bbl file into your source .tex file so as to provide
+% ONE 'self-contained' source file.
+%
+% Questions regarding SIGS should be sent to
+% Adrienne Griscti ---> griscti@acm.org
+%
+% Questions/suggestions regarding the guidelines, .tex and .cls files, etc. to
+% Gerald Murray ---> murray@hq.acm.org
+%
+% For tracking purposes - this is V3.1SP - APRIL 2009
+
+\documentclass{sig-alternate-ipsn13}
+
+%-----------------------------------------
+% need for camera-ready
+\pagestyle{empty}
+
+%----------------------------------------
+
+\begin{document}
+
+\title{
+Zero-Copy I/O Processing for Real-Time GPU Applications
+}
+%
+% You need the command \numberofauthors to handle the 'placement
+% and alignment' of the authors beneath the title.
+%
+% For aesthetic reasons, we recommend 'three authors at a time'
+% i.e. three 'name/affiliation blocks' be placed beneath the title.
+%
+% NOTE: You are NOT restricted in how many 'rows' of
+% "name/affiliations" may appear. We just ask that you restrict
+% the number of 'columns' to three.
+%
+% Because of the available 'opening page real-estate'
+% we ask you to refrain from putting more than six authors
+% (two rows with three columns) beneath the article title.
+% More than six makes the first-page appear very cluttered indeed.
+%
+% Use the \alignauthor commands to handle the names
+% and affiliations for an 'aesthetic maximum' of six authors.
+% Add names, affiliations, addresses for
+% the seventh etc. author(s) as the argument for the
+% \additionalauthors command.
+% These 'additional authors' will be output/set for you
+% without further effort on your part as the last section in
+% the body of your article BEFORE References or any Appendices.
+
+\numberofauthors{2} %  in this sample file, there are a *total*
+% of EIGHT authors. SIX appear on the 'first-page' (for formatting
+% reasons) and the remaining two appear in the \additionalauthors section.
+%
+\author{
+% You can go ahead and credit any number of authors here,
+% e.g. one 'row of three' or two rows (consisting of one row of three
+% and a second row of one, two or three).
+%
+% The command \alignauthor (no curly braces needed) should
+% precede each author name, affiliation/snail-mail address and
+% e-mail address. Additionally, tag each line of
+% affiliation/address with \affaddr, and tag the
+% e-mail address with \email.
+%
+\alignauthor Shinpei Kato\\
+       \affaddr{Department of Information Engineering}\\
+       \affaddr{Nagoya University}
+\and
+\alignauthor Jason Aumiller and Scott Brandt\\
+       \affaddr{Department of Computer Science}\\
+       \affaddr{University of California, Santa Cruz}
+\and
+\alignauthor Nikolaus Rath\\
+       \affaddr{Department of Applied Physics and Applied Mathematics}\\
+       \affaddr{Columbia University}
+}
+% There's nothing stopping you putting the seventh, eighth, etc.
+% author on the opening page (as the 'third row') but we ask,
+% for aesthetic reasons that you place these 'additional authors'
+% in the \additional authors block, viz.
+%\additionalauthors{Additional authors: John Smith (The Th{\o}rv{\"a}ld Group,
+%email: {\texttt{jsmith@affiliation.org}}) and Julius P.~Kumquat
+%(The Kumquat Consortium, email: {\texttt{jpkumquat@consortium.net}}).}
+%\date{30 July 1999}
+% Just remember to make sure that the TOTAL number of authors
+% is the number that will appear on the first page PLUS the
+% number that will appear in the \additionalauthors section.
+
+\maketitle
+
+%-----------------------------------------
+% need for camera-ready
+\thispagestyle{empty}
+
+\begin{abstract}
+ Cyber-physical systems (CPS) often control complex physical
+ phenomenon. 
+ The computational workload of control algorithms, hence, is becoming a
+ core challenge of CPS due to their real-time constraints.
+ By nature, CPS control algorithms exhibit a high degree of data
+ parallelism, which can be offloaded to parallel compute devices,
+ such as graphics processing units (GPUs).
+ Yet another problem is introduced by the communication overhead between
+ the host processor and the compute device.
+ As a matter of fact, plasma fusion requires a sampling period of a few
+ microseconds, while today's systems may take several ten microseconds
+ to copy data between the host and the device memory at scale of the
+ required data size.
+ In this paper, we present a zero-copy I/O processing scheme that
+ enables sensor and actuator devices to directly communicate with
+ compute devices without accessing the host processor.
+ This scheme maps the I/O address space to the device memory to remove
+ data-copy operations with respect to the host memory.
+ The experimental results from Columbia University's ``Tokamak'' fusion
+ control system demonstrate that a sampling period of plasma fusion can
+ be reduced by 33\% under the zero-copy I/O scheme.
+ The microbenchmarking results also show that GPU-accelerated
+ tasks can be completed in 34\% less time than current methods, while
+ effective data throughput is at least as good as the best performers of
+ current methods.
+\end{abstract}
+
+\keywords{GPGPU, Zero-Copy I/O, Plasma Fusion}
+
+\section{Introduction}
+\label{sec:introduction}
+
+\cite{Kato_ATC11}.\cite{Kato_RTAS11}.
+
+\bibliographystyle{abbrv}
+\bibliography{references}
+
+\end{document}
