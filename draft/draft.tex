@@ -80,16 +80,16 @@ Zero-Copy I/O Processing for Real-Time GPU Applications
 % e-mail address with \email.
 %
 \alignauthor Shinpei Kato\\
-       \affaddr{Department of Information Engineering}\\
+       \affaddr{Dept. Information Engineering}\\
        \affaddr{Nagoya University}
 \and
-\alignauthor Jason Aumiller and Scott Brandt\\
-       \affaddr{Department of Computer Science}\\
-       \affaddr{University of California, Santa Cruz}
-\and
 \alignauthor Nikolaus Rath\\
-       \affaddr{Department of Applied Physics and Applied Mathematics}\\
+       \affaddr{Dept. Applied Physics and Applied Mathematics}\\
        \affaddr{Columbia University}
+\and
+\alignauthor Jason Aumiller and Scott Brandt\\
+       \affaddr{Dept. Computer Science}\\
+       \affaddr{University of California, Santa Cruz}
 }
 % There's nothing stopping you putting the seventh, eighth, etc.
 % author on the opening page (as the 'third row') but we ask,
@@ -109,40 +109,10 @@ Zero-Copy I/O Processing for Real-Time GPU Applications
 % need for camera-ready
 \thispagestyle{empty}
 
-\begin{abstract}
- Cyber-physical systems (CPS) often control complex physical
- phenomenon. 
- The computational workload of control algorithms, hence, is becoming a
- core challenge of CPS due to their real-time constraints.
- By nature, CPS control algorithms exhibit a high degree of data
- parallelism, which can be offloaded to parallel compute devices,
- such as graphics processing units (GPUs).
- Yet another problem is introduced by the communication overhead between
- the host processor and the compute device.
- As a matter of fact, plasma fusion requires a sampling period of a few
- microseconds, while today's systems may take several ten microseconds
- to copy data between the host and the device memory at scale of the
- required data size.
- In this paper, we present a zero-copy I/O processing scheme that
- enables sensor and actuator devices to directly communicate with
- compute devices without accessing the host processor.
- This scheme maps the I/O address space to the device memory to remove
- data-copy operations with respect to the host memory.
- The experimental results from Columbia University's ``Tokamak'' fusion
- control system demonstrate that a sampling period of plasma fusion can
- be reduced by 33\% under the zero-copy I/O scheme.
- The microbenchmarking results also show that GPU-accelerated
- tasks can be completed in 34\% less time than current methods, while
- effective data throughput is at least as good as the best performers of
- current methods.
-\end{abstract}
-
+\input{abstract.tex}
 \keywords{GPGPU, Zero-Copy I/O, Plasma Fusion}
 
-\section{Introduction}
-\label{sec:introduction}
-
-\cite{Kato_ATC11}.\cite{Kato_RTAS11}.
+\input{introduction.tex}
 
 \bibliographystyle{abbrv}
 \bibliography{references}
