@@ -1,40 +1,91 @@
 \section{I/O Processing Schemes}
 \label{sec:io_processing}
 
-In this work we focus on three primary methods of data communication (illustrated in figure \ref{fig:comm_models}).
-The first two are provided by the CUDA API, and the third is our own extension of the API. We also introduce a fourth which is a hybrid of ours and an existing method.
+This section presents a new zero-copy I/O processing scheme for GPU
+computing. 
+This scheme differs from the existing schemes in that both the GPU
+execution and the data transfer times are minimized to meet a
+requirement of low-latency GPU computing.
+First of all, we introduce two existing schemes that are already
+supported by CUDA.
+We then present a new scheme, and also introduce a hybrid variant of our 
+scheme and the existing one, which is suit for a specific case.
+
+\subsection{Host and Device Memory ({\hd})}
+\label{sec:hd}
+
 \begin{figure}[!t]
-\centering
-\includegraphics[width=\hsize]{eps/dh.eps}
-\caption{Data communication using different memory allocation methods}
-\label{fig:comm_models}
+ \centering
+ \includegraphics[width=\hsize]{eps/hd.eps}
+ \caption{The traditional {\hd} scheme.}
+ \label{fig:hd}
 \end{figure}
-\subsection{Host Memory and Device Memory (H+D)}
-The most common and straightforward model for GPGPU computing is as follows: 
-\begin{enumerate} \itemsep1pt
-\item Memory is allocated on the host and is initialized with the input data.
-\item Sufficient memory is also allocated on the GPU for the input data as well as any space needed for output data.
-\item The host initiates a memory copy from its main memory to the GPU.
-\item The kernel function is launched on the GPU.
-\item When computation is complete, the host initiates a copy from the GPU back to the host to retrieve the result.
-\item Memory is de-allocated on the GPU and host.
+
+This is the most common scheme of GPU computing in the literature.
+In this scheme, there is space overhead in that the input and output
+data must exist in both the device and the host memory at once.
+Furthermore, there is a time penalty incurred to copy data, which is
+almost proportional to the data size.
+When applying this scheme, we allocate the same size of buffers to the
+host and the device memory individually, and copy data between them
+explicitly.
+
+Figure~\ref{fig:hd} illustrates an overview of how this scheme works:
+\begin{enumerate}
+ \item The device driver of the input deivce configures the input device
+       to send data to the allocated space of the host memory.
+ \item The device driver of the GPU copies the data to the
+       PCI-mapped space of the host memory, which is accessible to the
+       device memory.
+ \item The device driver of the GPU further copies the data to the
+       allocated space of the device memory.
+       Now, the GPU can access the data.
+ \item When GPU computation is completed, the device driver of the
+       GPU copies the output data back to the PCI-mapped space of the
+       host memory.
+ \item The device driver of the GPU further copies the output data back
+       to the allocated space of the host memory.
+ \item Finally, the device driver of the output device configures the
+       output device to receive the data from the allocated space of the
+       host memory.
 \end{enumerate}
 
-In this model there is space overhead in that the input and output
-data must exist in two places at once. Furthermore, there is a time
-penalty incurred for copying data that is proportional to its size. 
+As desribed above, the {\hd} scheme incurs some overhead to copy the
+same data twice for each direction of data transfer between the host and
+the device memory.
+This overhead might be a crucial penalty for low-latency GPU computing.
 
 \subsection{Host Pinned Memory (Hpin)}
-An alternative to allocating memory on both the host and GPU, the device
-can allocate page-locked memory (also known as `pinned' memory) on
-the host. It is mapped into the address space of the device and can be 
-referenced directly by the GPU code. Since this memory is not page-able it is always resident in
-the host RAM. It does, however, reduce the amount of available physical memory on the host 
-which can adversely affect system performance.
-Using this model data can be written directly into this space with
-no need for an intermediate host buffer or copying\cite{CUDA}.  
+
+\begin{figure}[!t]
+ \centering
+ \includegraphics[width=\hsize]{eps/hp.eps}
+ \caption{The zero-copy {\hp} scheme.}
+ \label{fig:hp}
+\end{figure}
+
+As an alternative to allocating the buffers to both the host and the
+device memory, we can allocate the buffers to page-locked PCI-mapped
+space of the host memory, also known as \textit{pinned} host memory.
+Since recent GPU architectures support unified addressing, this memory
+space can be referenced by the GPU.
+A major advantage of this scheme is that the input and the output
+devices can also directly access this memory space, which means that
+there is no need for intermediate buffers and data copies to have the
+GPU access the data.
+
+Figure~\ref{fig:hp} illustrates an overview of how this scheme works:
 
 \subsection{Device Memory Mapped to Host (Dmap)}
+
+\begin{figure}[!t]
+ \centering
+ \includegraphics[width=\hsize]{eps/dm.eps}
+ \caption{The zero-copy {\dm} scheme.}
+ \label{fig:dm}
+\end{figure}
+
+
 The key to our method is having the host point directly to data on the GPU.
 %We accomplish this by extending the CUDA API, adding the function {\tt cuMemMap()} which takes a pointer to already allocated space on the device
 %and maps that space to a pointer declared on the host. 
@@ -56,79 +107,3 @@ This method is the same as \dm\ as far as memory allocation and mapping. Like \d
 Although this memory mapping ability is used by NVIDIA's proprietary drivers it is not accessible to the programmer via the publicly available APIs (CUDA and OpenCL). To use this functionality our system requires the use of an open-source device driver such as nouveau or PathScale's pscnv\cite{ENZO}. 
 %
 
-\subsection{System Implementation}
-\label{sec:implementation}
-
-GPGPU programs typically access the \textit{virtual address space} of
-GPU device memory to allocate and manage data.
-In CUDA programs, for instance, a device pointer acquired through
-memory allocation functions such as {\tt cuMemAlloc()} and {\tt
-cuMemAllocHost()} represents the virtual address.
-Relevant data-copy functions such as {\tt cuMemcpyHtoD()} and {\tt
-cuMemcpyDtoH()} also use these pointers to virtual addresses instead of
-those to physical addresses.
-As long as the programs remain within the GPU and CPU this is a
-suitable addressing model.
-However, embedded systems often require I/O devices to be involved in
-sensing and actuation.
-The existing API designs for GPGPU programming force these embedded
-systems to use main memory as an intermediate buffer to bridge across
-the I/O device and GPU -- there are no available system
-implementations that enable data to be transfered directly between the
-I/O device and GPU.
-
-In this section we present our system implementation of the \dm\ and \dmh\ 
-methods using Gdev~\cite{Kato:Gdev:USENIX.ATC.2012}.
-A key challenge in the implementation is to overcome the limitation that
-I/O devices are accessible to only the I/O address space.
-Given that the GPU is typically connected to the system via the PCI bus,
-we take an approach that maps the virtual address space of GPU
-device memory to the I/O address space of the PCI bus.
-By this means, an I/O device can directly access data present in the GPU device memory.
-More specifically, the device driver can configure the DMA engine of the
-I/O device to target the PCI bus address associated with the mapped
-space of GPU device memory.
-
-Our system implementation adds three API functions to CUDA: (i) {\tt
-cuMemMap()}, (ii) {\tt cuMemUnmap()}, and (iii) {\tt
-cuMemGetPhysAddr()}.
-The {\tt cuMemMap()} and {\tt cuMemUnmap()} functions are introduced to
-map and un-map the virtual address space of GPU device memory to and
-from the user buffer allocated in main memory.
-These functions are somewhat complicated since main memory and GPU
-device memory cannot share the same virtual address space.
-We must first map the virtual address space of GPU device memory to one
-of the PCI I/O regions specified by the base address registers (BARs),
-and next remap this PCI BAR space to the user buffer.
-When using host pinned memory, on the other hand, we simply allocate I/O
-memory pages, also known as DMA pages in the Linux kernel, and map the
-allocated pages to the user buffer.
-The Linux kernel, for instance, supports {\tt ioremap()} for the former
-case and {\tt mmap()} for the latter case.
-This paper is focused on the latter case of GPU device memory mapping,
-but the concept of our method described below is also applicable to hot
-memory mapping.
-This is because recent GPUs support unified addressing which allows the
-same virtual address space to describe both GPU device memory and host
-pinned memory.
-
-An I/O device driver may use the memory-mapped user buffer directly.
-For example, if the size of I/O data is small enough, the device driver
-can simply read and write data using this user buffer.
-If the system deals with a large size of data, however, we need to
-obtain the physical address of the PCI BAR space corresponding to the
-target space of GPU device memory so that the device driver can
-configure the DMA engine of the I/O device to transfer data in burst
-mode to/from the PCI bus.
-We provide the {\tt cuMemGetPhysAddr()} function for this purpose.
-This function itself simply returns the physical address of the PCI BAR
-space associated with the requested target space of GPU device memory.
-Note that we must make the PCI BAR space contiguous with respect to the
-data set transferred by the DMA engine.
-The DMA transfer would fail otherwise.
-
-There is an exception in the case where the size of I/O data to be mapped and
-transferred is greater than the maximum size of the PCI BAR space.
-For instance, NVIDIA \emph{Fermi} GPUs limit the PCI BAR space to be no greater
-than 128MB.
-This is the current limitation of our implementation.
