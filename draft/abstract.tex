@@ -1,27 +1,30 @@
 \begin{abstract}
- Cyber-physical systems (CPS) often control complex physical
- phenomenon. 
- The computational workload of control algorithms, hence, is becoming a
- core challenge of CPS due to their real-time constraints.
- By nature, control algorithms of CPS exhibit a high degree of data
- parallelism, which can be offloaded to parallel compute devices,
- such as graphics processing units (GPUs).
- Yet another problem is introduced by the communication between the host
+ Cyber-physical systems (CPS) aim to control complex real-world
+ phenomenon.
+ Due to real-time constraints, however, the computational cost of
+ control algorithms is becoming a major issue of CPS.
+ Parallel computing of the control algorithms using state-of-the-art
+ compute devices, such as graphics processing units (GPUs), is a
+ promissing approach to reduce this computational cost, given that
+ real-world phenomenon by nature compose data parallelism, yet another
+ problem is introduced by the overhead of data transfer between the host
  processor and the compute device.
  As a matter of fact, plasma control requires an order of a few
- microseconds for the sampling period, while today's systems may take
- several ten microseconds to copy data between the host and the device
- memory at scale of the required data size.
- In this paper, we present a zero-copy I/O processing scheme that
+ microseconds for the control rate, while today's systems may take an
+ order of ten microseconds to copy the corresponding problem size of
+ data between the host processor and the compute device, which is
+ unacceptable lantecy.
+ In this paper, we propose a zero-copy I/O processing scheme that
  enables sensor and actuator devices to directly transfer data to and
- from compute devices without using the host processor.
- The basic idea behind this scheme is to map the I/O address space onto
- the device memory, removing data-copy operations upon the host memory.
- The experimental results from the real-world plasma control
- system demonstrate that a sampling period of plasma control can be
- reduced by 33\% under the zero-copy I/O scheme.
- The microbenchmarking results also show that GPU-accelerated matrix
- computations can be completed in 34\% less time than current methods,
- while effective data throughput is at least as good as the current best
- performers.
+ from the compute device.
+ The basic idea behind this scheme is to map I/O address space,
+ accessible to sensor and actuator devices, to virtual memory space of
+ the compute device.
+ The results of experiments using the real-world plasma control system
+ demonstrates that the computational cost of the plasma control
+ algorithm is reduced by 33\% under our new scheme.
+ We further provide the results of microbenchmarking to show that more
+ generic matrix computations are completed in 34\% less time than
+ current methods, using our new scheme, while effective data throughput
+ remains at least as good as the current best performers.
 \end{abstract}
