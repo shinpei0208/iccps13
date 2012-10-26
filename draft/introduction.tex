@@ -15,13 +15,6 @@ has imposed a core challenge on systems technology.
 In this paper, we tackle this problem with a specific example of plasma
 control.
 
-\begin{figure}[tb]
- \centering
- \includegraphics[width=0.8\hsize]{eps/tokamak.eps}
- \caption{The HBT-EP ``Tokamak'' at Columbia University.}
- \label{fig:tokamak}
-\end{figure}
-
 Plasma control for fusion is an applications of energy CPS, where
 complex algorithms must be computed at a very high rate.
 Figure~\ref{fig:tokamak} shows the HBT-EP Tokamak at Columbia
@@ -43,6 +36,13 @@ data between the CPU and the GPU, it is not affordable for the current
 software stack to apply the GPU for plasma control in real-time.
 This is a signficant problem not only for plasma control but also for
 any applications of CPS that are augmented with compute devices.
+
+\begin{figure}[t]
+ \centering
+ \includegraphics[width=0.78\hsize]{eps/tokamak.eps}
+ \caption{The HBT-EP ``Tokamak'' at Columbia University.}
+ \label{fig:tokamak}
+\end{figure}
 
 In order to utilize the GPU for applications of CPS, the system is
 required to support a method of bypassing data transfer between the CPU
@@ -85,5 +85,13 @@ state-of-the-art GPU computing technology.
 The rest of this paper is organized as follows.
 Section~\ref{sec:system_model} describes the system model and
 assumptions behind this paper.
-Section~\ref{sec:io_processing} presents our zero-copy I/O processing
+Section~\ref{sec:io_processing} proposes our zero-copy I/O processing
 scheme, and differentiates it from the exisiting schemes.
+Section~\ref{sec:implementation} presents details of system
+implementation.
+In Section~\ref{sec:case_study}, a case study of plasma control is
+provided to demonstrate the real-world impact of our contribution.
+Microbenchmarks are also used to evaluate more generic properties of the
+I/O processing schemes in Section~\ref{sec:benchmarking}.
+Section~\ref{sec:related_work} introduces related work, and this paper
+concludes in Section~\ref{sec:conclusion}.

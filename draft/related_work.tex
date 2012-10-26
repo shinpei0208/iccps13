@@ -1,0 +1,11 @@
+\section{Related Work}
+\label{sec:related_work}
+
+NVIDIA's \emph{Fermi} architecture\cite{Fermi} supports unified virtual addressing (UVA) which creates a single address space for host memory and multiple GPUs. This allows their {\tt cuMemcpyPeer()} function to copy data directly between GPUs over the PCIe bus without the involvement of the host CPU or memory. It is, of course, restricted for use between NVIDIA GPUs -- not arbitrary I/O devices.
+
+An automatic system for managing and optimizing CPU-GPU communication has been developed called CGCM\cite{Jablin:2011:ACC:1993316.1993516}. It uses compiler modifications in conjunction with a runtime library to manipulate the timing of events in a way that effectively reduces transfer overhead. By analyzing source code, they are able to identify operations that can be temporally promoted while still preserving dependencies. This is made possible in part by taking advantage of the ability to concurrently copy data and execute kernel functions.
+
+PTask\cite{Rossbach_SOSP11} is a project that provides GPU programming abstractions that are supported by the OS. One aspect of the project is the use
+of a data-flow programming model to minimize data communication between the host and GPU.
+
+High priority compute tasks may have high blocking times imposed on them due to data transfers. RGEM\cite{Kato_RTSS11} is a project that aims to bound these blocking times by dividing data into chunks. This effectively creates preemption points to allow finer grained scheduling of GPU tasks to fully exploit the ability to concurrently copy data and execute code.
