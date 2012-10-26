@@ -57,6 +57,25 @@ Each scheme is applied as follows:
        the control algorithm is limited within the device memory.
 \end{itemize}
 
+This paper does not provide the details of the control algorithm, since
+it is not within the scope of this paper.
+Interested readers are encouraged to reference \cite{Boozer_PP99}.
+The outline of the control system implementation is that the host
+program launches the device program on the GPU once at the beginning
+when the system is loaded.
+The device program is polling until the input data set arrives.
+This is due to a requirement of low-latency computing.
+The input and output modules are configured to write the input data to
+and read the output data from the specified PCI regions through DMA,
+respectively.
+These PCI regions are directly mapped to the device memory space
+allocated by the control system, using the {\dm} scheme proposed in this
+paper.
+In consequence, once the input and output modules are configured, and
+the device program is launched at the beginning, the algorithm can keep
+executing on the GPU, without accessing the CPU and the host memory at
+all.
+
 \begin{figure}[t]
  \centering
  \includegraphics[width=\hsize]{eps/eval_plasma.eps}
@@ -64,7 +83,7 @@ Each scheme is applied as follows:
  \label{fig:eval_plasma}
 \end{figure}
 
-We now demonstrate that our zero-copy I/O processing scheme reduces both
+We now demonstrate that the proposed {\dm} scheme reduces both
 the cycle time of algorithm execution and the latency of data transfer
 in this control system.
 Figure~\ref{fig:eval_plasma} shows the result of experiments conducted

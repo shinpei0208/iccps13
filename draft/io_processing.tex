@@ -55,7 +55,7 @@ same data twice for each direction of data transfer between the host and
 the device memory.
 This overhead might be a crucial penalty for low-latency GPU computing.
 
-\subsection{Host Pinned Memory (Hpin)}
+\subsection{Host Pinned Memory ({\hp})}
 \label{sec:hp}
 
 \begin{figure}[!t]
@@ -83,7 +83,7 @@ It is also pinned to always reside in the host memory, and therefore the
 GPU can read and write the data directly.
 However, this data access is expensive as is a PCIe communication.
 
-\subsection{Device Memory Mapped to Host (Dmap)}
+\subsection{Device Memory Mapped to Host ({\dm})}
 \label{sec:dm}
 
 \begin{figure}[!t]
@@ -143,7 +143,7 @@ To simplify the discussion, this paper focuses on PCIe BARs, but the
 same concept of zero-copy I/O processing can be also applied to any
 mapping methods.
 
-\subsection{Device Memory Mapped Hybrid (DmapH)}
+\subsection{Device Memory Mapped Hybrid ({\dmh})}
 \label{sec:dmh}
 
 This is a hybrid of the {\dm} and the {\hd} schemes, which is in
