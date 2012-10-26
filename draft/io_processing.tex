@@ -56,6 +56,7 @@ the device memory.
 This overhead might be a crucial penalty for low-latency GPU computing.
 
 \subsection{Host Pinned Memory (Hpin)}
+\label{sec:hp}
 
 \begin{figure}[!t]
  \centering
@@ -74,9 +75,16 @@ devices can also directly access this memory space, which means that
 there is no need for intermediate buffers and data copies to have the
 GPU access the data.
 
-Figure~\ref{fig:hp} illustrates an overview of how this scheme works:
+Figure~\ref{fig:hp} illustrates an overview of how this scheme works.
+Unlike the {\hd} scheme, the data transfer flow is pretty simple.
+There are no additional data copies required, since PCI-mapped space is
+directly accessible to the input and the output devices.
+It is also pinned to always reside in the host memory, and therefore the
+GPU can read and write the data directly.
+However, this data access is expensive as is a PCIe communication.
 
 \subsection{Device Memory Mapped to Host (Dmap)}
+\label{sec:dm}
 
 \begin{figure}[!t]
  \centering
@@ -85,25 +93,74 @@ Figure~\ref{fig:hp} illustrates an overview of how this scheme works:
  \label{fig:dm}
 \end{figure}
 
+We now present a new scheme called {\dm} that overcomes the
+problems of the {\hd} and the {\hp} schemes.
+The key to our scheme is having the PCIe base address register
+(BAR) point to the allocated space of the device memory, while mapping
+the allocated space of the host memory to the PCIe BAR as well.
+As a result, when the input device sends data to the PCI-mapped space of
+the host memory, the data appear on the corresponding allocated space of
+the device memory, seamlessly.
+This scheme, hence, does require the CPU to intermediate to copy the
+data between the host and the device memory, which removes the latency
+of data transfer observed in the {\hd} scheme.
+On the other hand, it also maintains the performance benefit of having
+the data on board, solving the problem of slow data accesses faced in
+the {\hp} scheme.
 
-The key to our method is having the host point directly to data on the GPU.
-%We accomplish this by extending the CUDA API, adding the function {\tt cuMemMap()} which takes a pointer to already allocated space on the device
-%and maps that space to a pointer declared on the host. 
-This simplifies the programming paradigm in that no explicit copying needs
-to take place -- the data can be referenced directly by the
-host. This means that input data can be written directly to
-the device without the need for intermediate buffers while the GPU
-maintains the performance benefit of having the data on board.
+Assuming that some space is already allocated to the device
+memory, the system is required to support the following functions to have I/O
+devices directly access this memory space:
 
-This model is not limited to mapping GPU memory space to the host, it
-is actually mapped to the PCI address space for the GPU which enables
-other devices to access it. This is how direct communication
-between the GPU and I/O devices is achieved.
+\begin{itemize}
+ \item \textbf{Mapping Memory:}
+       As technology reads today, PCIe BARs are the most reasonable
+       windows that see through the device memory from the host and I/O
+       space.
+       Therefore, we first need to reserve the corresponding size of
+       PCIe BAR space, and next map it to the allocated space of the
+       device memory.
+       Now, if the user requests to access it from the host program, the
+       system needs to further remap it to the user buffers.
+ \item \textbf{Unmapping Memory:}
+       PCIe BARs are limited resources. Most GPUs provide at most 128MB
+       for a single BAR, as of 2012.
+       Therefore, unmapping the device memory from the BAR is an essential
+       function for this scheme.
+ \item \textbf{Getting Physical Address:}
+       The mapped space is typically referenced as virtual memory space
+       of the GPU or the CPU.
+       However, I/O devices often target physical address for data transfer.
+       Hence, the system needs to maintain the physical address of the
+       PCI-mapped space, and relay it to the device drivers of I/O devices.
+\end{itemize}
+
+In fact, PCIe BARs are not only the windows that can communicate with
+the device memory.
+Recent GPUs, particularly, support special windows upon the
+memory-mapped I/O (MMIO) space.
+To simplify the discussion, this paper focuses on PCIe BARs, but the
+same concept of zero-copy I/O processing can be also applied to any
+mapping methods.
 
 \subsection{Device Memory Mapped Hybrid (DmapH)}
-This method is the same as \dm\ as far as memory allocation and mapping. Like \dm\, the host references the GPU memory directly when writing data. For reading, however, we perform an explicit copy from GPU to host. The motivation for this is explained in our evaluation in section \ref{sec:evaluation}.
+\label{sec:dmh}
 
-% merge with implementation
-Although this memory mapping ability is used by NVIDIA's proprietary drivers it is not accessible to the programmer via the publicly available APIs (CUDA and OpenCL). To use this functionality our system requires the use of an open-source device driver such as nouveau or PathScale's pscnv\cite{ENZO}. 
-%
+This is a hybrid of the {\dm} and the {\hd} schemes, which is in
+particular suited to communicate between the host and the device
+memory.
+Applications of CPS using I/O devices, thereby, may not benefit from
+this scheme; if the host memory is used to store some data, this scheme
+is still effective.
 
+This scheme is the same as the {\dm} scheme as far as memory allocation
+and mapping.
+For transfering data from the host to the device memory, we have the
+host processor reference the device memory directly through the
+mapped region, like the {\dm} scheme.
+However, we perform an explicit copy from the device to the host memory
+for an opposite direction of data transfer.
+The motivation to do so is that writing to the host memory is more
+expensive than reading, due to functionality of the host memory
+management unit (MMU).
+We evaluate the impact of this scheme in Section~\ref{sec:benchmarking}.
