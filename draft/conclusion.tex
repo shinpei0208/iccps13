@@ -1,0 +1,23 @@
+\section{Conclusion}
+\label{sec:conclusion}
+
+In this paper, we have presented a new approach to zero-copy I/O
+processing schemes for low-latency GPU computing.
+This is a significant contribution to meet a real-time and real-fast
+requirement of CPS.
+The plasma control system, developed as an example application of CPS,
+demonstrated that our zero-copy I/O processing scheme achieved a very
+high rate of $16\mu$s for full plasma control processing.
+Our microbenchmarking evaluation also disclosed the detailed properties
+of I/O processing schemes for the GPU.
+We believe that the contribution of this paper facilitates a grander
+vision of CPS using parallel computing technology.
+
+In future work, we extend our schemes to support multiple contexts.
+This extension is essential to control multiple plants using the
+identical GPU.
+A key challenge is to ensure exclusive direct access to the same memory
+space, because the device driver and the runtime system cannot
+intermidiate in zero-copy I/O processing.
+We also plan to generalize our schemes for arbitrary I/O devices such as
+ethernet and firewire interfaces.

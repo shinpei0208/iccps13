@@ -2,14 +2,13 @@
 \label{sec:io_processing}
 
 This section presents a new zero-copy I/O processing scheme for GPU
-computing. 
-This scheme differs from the existing schemes in that both the GPU
-execution and the data transfer times are minimized to meet a
-requirement of low-latency GPU computing.
-First of all, we introduce two existing schemes that are already
-supported by CUDA.
-We then present a new scheme, and also introduce a hybrid variant of our 
-scheme and the existing one, which is suit for a specific case.
+computing, which differs from existing schemes in that both GPU
+execution and data transfer times are minimized to achieve the goal of
+low-latency GPU computing. 
+In the rest of this section, we first investigate two existing schemes,
+{\hd} and {\hp}, that are already supported by CUDA.
+We then present a new scheme called {\dm} and introduce a hybrid
+variant of {\dm} and an existing one, suited for a specific case. 
 
 \subsection{Host and Device Memory ({\hd})}
 \label{sec:hd}
@@ -23,16 +22,17 @@ scheme and the existing one, which is suit for a specific case.
 
 This is the most common scheme of GPU computing in the literature.
 In this scheme, there is space overhead in that the input and output
-data must exist in both the device and the host memory at once.
-Furthermore, there is a time penalty incurred to copy data, which is
-almost proportional to the data size.
+data exist in both the device and the host memory at the same time and
+must be explicitly copied between them.
+Furthermore, there is a time penalty incurred to copy data at a cost
+nearly proportional to the data size.
 When applying this scheme, we allocate the same size of buffers to the
-host and the device memory individually, and copy data between them
+host and the device memory individually and copy data between them
 explicitly.
 
 Figure~\ref{fig:hd} illustrates an overview of how this scheme works:
 \begin{enumerate}
- \item The device driver of the input deivce configures the input device
+ \item The device driver of the input device configures the input device
        to send data to the allocated space of the host memory.
  \item The device driver of the GPU copies the data to the
        PCI-mapped space of the host memory, which is accessible to the
@@ -50,9 +50,9 @@ Figure~\ref{fig:hd} illustrates an overview of how this scheme works:
        host memory.
 \end{enumerate}
 
-As desribed above, the {\hd} scheme incurs some overhead to copy the
-same data twice for each direction of data transfer between the host and
-the device memory.
+As described above, the {\hd} scheme incurs overhead to copy the same
+data twice for each direction of data transfer between the host and the
+device memory.
 This overhead might be a crucial penalty for low-latency GPU computing.
 
 \subsection{Host Pinned Memory ({\hp})}
@@ -61,7 +61,7 @@ This overhead might be a crucial penalty for low-latency GPU computing.
 \begin{figure}[!t]
  \centering
  \includegraphics[width=\hsize]{eps/hp.eps}
- \caption{The zero-copy {\hp} scheme.}
+ \caption{The traditional {\hp} scheme.}
  \label{fig:hp}
 \end{figure}
 
@@ -81,7 +81,7 @@ There are no additional data copies required, since PCI-mapped space is
 directly accessible to the input and the output devices.
 It is also pinned to always reside in the host memory, and therefore the
 GPU can read and write the data directly.
-However, this data access is expensive as is a PCIe communication.
+However, this data access is expensive as it is a PCIe communication.
 
 \subsection{Device Memory Mapped to Host ({\dm})}
 \label{sec:dm}
@@ -89,19 +89,19 @@ However, this data access is expensive as is a PCIe communication.
 \begin{figure}[!t]
  \centering
  \includegraphics[width=\hsize]{eps/dm.eps}
- \caption{The zero-copy {\dm} scheme.}
+ \caption{The new zero-copy {\dm} scheme.}
  \label{fig:dm}
 \end{figure}
 
-We now present a new scheme called {\dm} that overcomes the
-problems of the {\hd} and the {\hp} schemes.
-The key to our scheme is having the PCIe base address register
+We now present {\dm}, which overcomes the problems of the {\hd} and the
+{\hp} schemes.
+The key to the {\dm } scheme is having the PCIe base address register
 (BAR) point to the allocated space of the device memory, while mapping
 the allocated space of the host memory to the PCIe BAR as well.
 As a result, when the input device sends data to the PCI-mapped space of
-the host memory, the data appear on the corresponding allocated space of
-the device memory, seamlessly.
-This scheme, hence, does require the CPU to intermediate to copy the
+the host memory, the data seamlessly appear on the corresponding
+allocated space of the device memory.
+This scheme, hence, does not require the CPU to intermediate to copy the
 data between the host and the device memory, which removes the latency
 of data transfer observed in the {\hd} scheme.
 On the other hand, it also maintains the performance benefit of having
@@ -123,8 +123,8 @@ devices directly access this memory space:
        Now, if the user requests to access it from the host program, the
        system needs to further remap it to the user buffers.
  \item \textbf{Unmapping Memory:}
-       PCIe BARs are limited resources. Most GPUs provide at most 128MB
-       for a single BAR, as of 2012.
+       PCIe BARs are limited resources. Most GPUs currently provide at
+       most 128MB for a single BAR.
        Therefore, unmapping the device memory from the BAR is an essential
        function for this scheme.
  \item \textbf{Getting Physical Address:}
@@ -137,11 +137,10 @@ devices directly access this memory space:
 
 In fact, PCIe BARs are not only the windows that can communicate with
 the device memory.
-Recent GPUs, particularly, support special windows upon the
-memory-mapped I/O (MMIO) space.
+Recent GPUs support special windows upon the memory-mapped I/O (MMIO) space.
 To simplify the discussion, this paper focuses on PCIe BARs, but the
 same concept of zero-copy I/O processing can be also applied to any
-mapping methods.
+mapping method.
 
 \subsection{Device Memory Mapped Hybrid ({\dmh})}
 \label{sec:dmh}
@@ -153,9 +152,9 @@ Applications of CPS using I/O devices, thereby, may not benefit from
 this scheme; if the host memory is used to store some data, this scheme
 is still effective.
 
-This scheme is the same as the {\dm} scheme as far as memory allocation
+This scheme is the same as {\dm} as far as memory allocation
 and mapping.
-For transfering data from the host to the device memory, we have the
+For transferring data from the host to the device memory, we have the
 host processor reference the device memory directly through the
 mapped region, like the {\dm} scheme.
 However, we perform an explicit copy from the device to the host memory

@@ -1,92 +1,88 @@
 \section{Introduction}
 \label{sec:introduction}
 
-Cyber-physical systems (CPS) are next generations of networked and
-embedded systems, tightly coupled with computation and physical
-elements to control real-world phenomenon.
-Control algorithms of CPS, therefore, are becoming more and more
-complex, which makes CPS distinguished from traditional safety-critical
-systems.
-In CPS applications, ``real-fast'' is often as important as ``real-time'',
-while safety-critical systems are likely to have only the real-time
-constraint. 
-Such a double-edge real-time and real-fast requirement of CPS, however,
-has imposed a core challenge on systems technology.
-In this paper, we tackle this problem with a specific example of plasma
-control.
-
-Plasma control for fusion is an applications of energy CPS, where
-complex algorithms must be computed at a very high rate.
-Figure~\ref{fig:tokamak} shows the HBT-EP Tokamak at Columbia
-University~\cite{Maurer_PPCF11,Rath_FED12} that magnetically controls
-the 3-D perturbed equilibrium state of the plasma~\cite{Boozer_PP99}.
-It is required to process 96 inputs and 64 outputs of 16-bit data at a
-control rate of a few microseconds.
-An initial attempt of the Columbia team employed fast CPUs or FPGAs, but
-even the simplified algorithm failed to run within 20$\mu$s.
-An alternative approach was to parallelize the algorithm using the
-graphics processing unit (GPU) and CUDA~\cite{CUDA} -- the most
-successful massively parallel computing technology.
-However, the current system for GPU computing is not designed to
-integrate sensor and actuator devices with the GPU.
-This is attributed to the fact that the current software stack
-of GPU computing is independent of I/O device drivers.
-Since it might take tens of microseconds to transfer hundreds-of-bytes
-data between the CPU and the GPU, it is not affordable for the current
-software stack to apply the GPU for plasma control in real-time.
-This is a signficant problem not only for plasma control but also for
-any applications of CPS that are augmented with compute devices.
-
 \begin{figure}[t]
  \centering
- \includegraphics[width=0.78\hsize]{eps/tokamak.eps}
- \caption{The HBT-EP ``Tokamak'' at Columbia University.}
+ \includegraphics[width=0.82\hsize]{eps/tokamak.eps}
+ \caption{Columbia's HBT-EP ``Tokamak''.}
  \label{fig:tokamak}
 \end{figure}
 
-In order to utilize the GPU for applications of CPS, the system is
-required to support a method of bypassing data transfer between the CPU
-and the GPU, instead connecting the GPU and I/O devices directly.
-To the best of our knowledge, however, there is currently no generic
-systems support for such a direct data transfer machanism except for
+Cyber-physical systems (CPS) represent next generation networked and
+embedded systems, tightly coupled with computation and physical
+elements to control real-world phenomenon.
+Their control algorithms, therefore, are becoming more and more complex,
+which distinguishes CPS from traditional safety-critical embedded
+systems.
+Specifically, ``real-fast'' is usually as important as ``real-time''.
+This double-edge real-fast and real-time requirement of CPS imposes a
+core challenge on systems technology.
+
+Plasma control for fusion is an applications of energy CPS where
+complex algorithms must run at a very high rate.
+Figure~\ref{fig:tokamak} shows the HBT-EP high-beta ``Tokamak'' device at
+Columbia University~\cite{Maurer_PPCF11,Rath_FED12}.
+It must process 96 inputs and 64 outputs of data in a few microseconds
+to magnetically control the 3-D perturbed equilibrium state of the
+plasma~\cite{Boozer_PP99}.
+An initial attempt at Columbia University employed fast cutting-edge
+CPUs or FPGAs, but even a simplified algorithm failed to meet 20$\mu$s.
+An alternative was to parallelize the algorithm using the
+graphics processing unit (GPU) and CUDA~\cite{CUDA}, which is the most
+successful parallel computing technology.
+However, GPU programming is currently not tailored to integrate
+sensor and actuator devices.
+This is due to the fact that the current GPU programming stack is
+completely independent of I/O device drivers.
+Since it can take tens of microseconds to transfer hundreds of bytes
+data between the CPU and the GPU, the state of the art is not adequate
+to apply the GPU for plasma control in real-time.
+This is a significant problem for not only plasma control but also any
+CPS applications that are augmented with compute devices.
+
+In order to effectively utilize the GPU for low-latency large-data CPS
+applications, the system must support a direct communication scheme that
+bypasses the data transfer between the CPU and the GPU by connecting the
+GPU and I/O devices directly.
+To the best of our knowledge, however, there is currently no
+standardized support for such a direct data transfer mechanism other than
 specialized commercial products for the InfiniBand
 network~\cite{GPUDirect}.
-As a way of eliminating the data transfer cost between the CPU and the
-GPU, the current programming framework often supports host memory
-allocation, which enables the GPU to access data on the host memory;
-however, it is unclear if this scheme is best suited for low-latency GPU
-computing, because the data access to the host memory from the GPU is
-expensive.
-Given that GPUs are increasingly deployed in the domain of
+To mitigate the data transfer overhead, some programming frameworks
+support host memory allocation, letting the GPU directly access data on
+the host memory.
+This scheme is ill-suited for low-latency GPU computing due to the high
+cost of GPU's data access to host memory.
+Given that GPU technology is increasingly deployed in
 CPS~\cite{Hirabayashi_REACTION12, Mangharam11, McNaughton_ICRA11,
 Michel_IROS07}, 
-and basic real-time resource management techniques for the GPU started to be
-disclosed \cite{Elliott_RTS12, Elliott_ECRTS12, Kato_RTAS11,
+and basic real-time resource management techniques for the GPU are
+starting to be developed \cite{Elliott_RTS12, Elliott_ECRTS12, Kato_RTAS11,
 Kato_RTSS11, Kato_ATC11, Kato_ATC12, Liu_PACT12}, it is time to look
-into a tight integration of I/O processing and GPU computing.
+into tighter integration of I/O processing and GPU computing.
 
 \textbf{Contribution:}
-In this paper, we present a zero-copy I/O processing scheme for GPU
+This paper presents a new \emph{zero-copy} I/O processing scheme for GPU
 computing.
-This scheme enables I/O devices to directly transfer a limited size of
-data to and from the GPU, by coordinating their device drivers. 
-We also investigate a possibility of the exisiting schemes to support
-low-latency GPU computing, and identify an advantage of our new scheme.
-To do so, we provide a case study using the Columbia University's
-Tokamak plasma control system that demonstrates an effect of our
-new scheme on a sampling period of plasma control.
-Furthermore, we provide microbenchmarking results to evaluate more
-generic properties of the I/O processing schemes
-By clarifying these capabilities, we aim to not only improve the overall
-performance but also broaden the scope of CPS that can benefit from the
-state-of-the-art GPU computing technology.
+This scheme allows I/O devices to directly transfer data to and from the
+GPU by mapping of memory and I/O address space.
+We investigate the problem of existing schemes for low-latency GPU
+computing, and demonstrate performance advantages of our zero-copy
+scheme with a case study using Columbia's Tokamak device.
+Experimental results show the clear benefit of our zero-copy scheme on
+the plasma period.
+We also provide microbenchmarks to highlight more generic
+properties of the I/O processing schemes.
+By clarifying these capabilities, we aim to not only improve performance
+but also broaden the scope of CPS that can benefit from state-of-the-art
+parallel computing technology.
 
 \textbf{Organization:}
 The rest of this paper is organized as follows.
 Section~\ref{sec:system_model} describes the system model and
 assumptions behind this paper.
 Section~\ref{sec:io_processing} proposes our zero-copy I/O processing
-scheme, and differentiates it from the exisiting schemes.
+scheme, and differentiates it from the existing schemes.
 Section~\ref{sec:implementation} presents details of system
 implementation.
 In Section~\ref{sec:case_study}, a case study of plasma control is

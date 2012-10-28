@@ -2,8 +2,8 @@
 \label{sec:case_study}
 
 In this section, we provide a case study of magnetic control of
-perturbed plasma equilibria using the HBT-EP ``Tokamak'' equipped with
-the GPU and the presented I/O processing schemes.
+perturbed plasma equilibria using the HBT-EP Tokamak equipped with
+the GPU and the aforementioned I/O processing schemes.
 This control system requires low latency and high computing capabilities
 to achieve a sampling period of the order of ten microseconds, while
 processing 96 inputs and 64 outputs of 16-bit data with a complex
@@ -26,9 +26,9 @@ this case study.
 The control input comes from a set of magnetic sensors through a D-TACQ
 ACQ196 digitizer, and the resulting control signal is sent to two D-TACQ
 AO32 analog output modules to excite control coils.
-These input and output modules are connected to the GPU upon the PCIe
-bus.
-We evaluate three different schemes against this system architecture
+These input and output modules are connected to the NVIDIA Tesla C2050
+GPU (448 cores and 4GB memory) upon the PCIe bus.
+We evaluate three schemes against this system architecture
 from the viewpoint of the cycle time of algorithm execution and the
 latency of data transfer. 
 Each scheme is applied as follows:
@@ -57,13 +57,12 @@ Each scheme is applied as follows:
        the control algorithm is limited within the device memory.
 \end{itemize}
 
-This paper does not provide the details of the control algorithm, since
-it is not within the scope of this paper.
-Interested readers are encouraged to reference \cite{Boozer_PP99}.
+This paper does not provide the details of the control
+algorithm~\cite{Boozer_PP99}, which is outside the scope of this paper.
 The outline of the control system implementation is that the host
 program launches the device program on the GPU once at the beginning
 when the system is loaded.
-The device program is polling until the input data set arrives.
+The device program polls until the input data set arrives.
 This is due to a requirement of low-latency computing.
 The input and output modules are configured to write the input data to
 and read the output data from the specified PCI regions through DMA,
@@ -83,20 +82,20 @@ all.
  \label{fig:eval_plasma}
 \end{figure}
 
-We now demonstrate that the proposed {\dm} scheme reduces both
-the cycle time of algorithm execution and the latency of data transfer
-in this control system.
+We now show that the {\dm} scheme reduces both the cycle time of
+algorithm execution and the latency of data transfer in this control
+system.
 Figure~\ref{fig:eval_plasma} shows the result of experiments conducted
 under the three different schemes, respectively.
-Apparently, the {\dm} scheme achieves the highest rate in both algorithm
+The {\dm} scheme achieves the highest rate in both algorithm
 execution and data transfer.
-The remaining two schemes, on the other hand, compromise either of them.
-It is fairly reasonable to observe that the {\hd} and the {\dm} schemes
-exhibit the same performance level for algorithm execution since they
-both use the device memory, while the latency of data transfer is
-equivalent between the {\hp} and the {\dm} schemes since they both
-remove data copies.
-Comparing the {\hd} and the {\hp} schemes, one can also observe that the
+The remaining two schemes, on the other hand, compromise one or the
+other of them.
+The {\hd} and the {\dm} schemes exhibit the same performance level for
+algorithm execution since they both use the device memory, while the
+data transfer latency of the {\hp} and the {\dm} schemes are equivalent
+since they both remove data copies.
+Comparing the {\hd} and the {\hp} schemes, one can also see that the
 impact of overhead introduced by data copies, \textit{i.e.}, $16\mu$s, is
 greater than that introduced by the GPU accessing pinned host memory
 space, \textit{i.e.}, $6\mu$s, on the overall system performance.
@@ -110,10 +109,10 @@ Lessons learned from this evaluation are summarized as follows:
        system, reducing the latency of data transfer from $16\mu$s to
        $4\mu$s.
        The speed-up ratio is 4$\times$.
- \item Furthermore, the {\dm} scheme proposed in this paper reduces the
-       cycle time of algorithm execution from $6\mu$s to $4\mu$s.
+ \item Furthermore, the {\dm} scheme reduces the cycle time of algorithm
+       execution from $6\mu$s to $4\mu$s.
        The speed-up ratio is 1.5$\times$.
-       Since the HBT-EP ``Tokamak'' accommodates up to 216 inputs,
+       Since the HBT-EP Tokamak accommodates up to 216 inputs,
        meaning that the cycle time of algorithm execution is more
        dominated by data accesses, the benefit of the {\dm} scheme over
        the {\hp} scheme would be more significant for a larger scale of
@@ -196,7 +195,7 @@ mode, and the effective control system latency now must be zero,
 Finally, we discuss practical findings of plasma control regarding the
 HBT-EP ``Tokamak'' device.
 Figure~\ref{fig:plasma_overview} shows a comparison of the average
-perturbation amplitudes with different phasings.
+perturbation amplitudes with different phasing.
 The control system incorporates four arrays of magnetic sensors and
 control coils, each of which controls one specific mode.
 They are placed at different poloidal angles around the toroidal ring.
@@ -206,5 +205,5 @@ From this experiment, we find that feedback at 280 degrees excites
 perturbation, while feedback at 100 degrees is the right range for
 suppression.
 As compared to no feedback scenario (``No FB'' in the figure), for
-example, we find that we can supress the strength of the rotating field
+example, we find that we can suppress the strength of the rotating field
 by up to 30\% for any mode observed in this experiment.

@@ -2,36 +2,33 @@
 \label{sec:system_model}
 
 This paper assumes that the system is composed of compute devices, input
-sensors, and output actuators, in addition to typical workstation
-components of the host computer.
-In particular, we restrict our attention to the GPU as a compute device,
-which best embraces a concept of many-core computing in the current
-state of the art.
-There are at least three \textit{device drivers} employed by the host
-computer to manage the GPU, the sensors, and the actuators,
+sensors, and output actuators, in addition to typical components of a
+host computer.
+We restrict our attention to GPUs as auxiliary compute devices,
+which best embrace the concept of many-core computing in the state of
+the art.
+There must be at least three \textit{device drivers} employed by the
+host computer to manage the GPU, sensors, and actuators,
 respectively.
-We also assume that these devices are connect to the Peripheral
-Component Interconnect Express (PCIe) bus to communicate with each
-other.
-The contribution of this paper, however, is not limited to the PCIe bus,
-but is also applicable to any interconnect as far as it is mappable to
-I/O address space.
+We assume that they are connected to the Peripheral Component
+Interconnect Express (PCIe) bus of the host computer.
+The contribution of this paper is not limited to the PCIe bus; it is
+applicable to any interconnect that is mappable to I/O address space.
 There are two kinds of memory associated with the address space.
-One is the host memory, also often referred to the main memory, which is
-incorporated by the host computer.
+One is the host memory, also referred to \emph{main memory}.
 The other is the device memory, which is encapsulated in the GPU.
-Both of the memory types must be mappable to the PCIe bus.
+Both memory types are (and must be) mappable to the PCIe bus.
 
 The control algorithm is parallelized and offloaded to the GPU.
-We specifically use CUDA to implement the algorithm, but any programming
+We use CUDA to implement the algorithm, but any programming
 language for the GPU is available under our model, because the
 application programming interface (API) considered in this paper does
 not depend on a specific programming language.
 All input data come from the sensor modules, while all output data go to
 the actuator modules.
-The buffers for these data can be allocated to any place visible to I/O
+The buffers for the data can be allocated to any place visible to I/O
 address space.
-According to the control system design, these data may or may not be
+According to the control system design, the data may or may not be
 further copied to other buffers.
 In either case, they are expressed as data \textit{arrays} in the
 control algorithm.
@@ -40,9 +37,9 @@ There are several other assumptions that simplify our system model.
 The system contains only the single real-time process (task) that
 executes the control algorithm, except for trivial background jobs to
 run the system.
-Therefore, we ignore the problem of shared resources among multiple
-tasks.
+We ignore the problem of shared resources among multiple tasks, which
+have been addressed elsewhere.
 We also focus on a single instance of the GPU to implement the control
-algorithm; this is not a conceptual limitation of this paper, and the
-algorithm implementation could use multiple GPUs, as far as I/O address
-space is unified among them.
+algorithm.
+This is not a conceptual limitation of this paper; the algorithm
+implementation could just as easily use multiple GPUs.
