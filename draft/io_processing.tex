@@ -31,7 +31,7 @@ host and the device memory individually and copy data between them
 explicitly.
 
 Figure~\ref{fig:hd} illustrates an overview of how this scheme works:
-\begin{enumerate}
+\begin{enumerate} \itemsep1pt
  \item The device driver of the input device configures the input device
        to send data to the allocated space of the host memory.
  \item The device driver of the GPU copies the data to the
@@ -112,7 +112,7 @@ Assuming that some space is already allocated to the device
 memory, the system is required to support the following functions to have I/O
 devices directly access this memory space:
 
-\begin{itemize}
+\begin{itemize} \itemsep1pt
  \item \textbf{Mapping Memory:}
        As technology reads today, PCIe BARs are the most reasonable
        windows that see through the device memory from the host and I/O

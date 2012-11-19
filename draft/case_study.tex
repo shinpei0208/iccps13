@@ -32,7 +32,7 @@ We evaluate three schemes against this system architecture
 from the viewpoint of the cycle time of algorithm execution and the
 latency of data transfer. 
 Each scheme is applied as follows:
-\begin{itemize}
+\begin{itemize} \itemsep1pt
  \item In the {\hd} scheme, the device driver of the digitizer transfers
        the input data set to the buffers allocated on the host memory.
        The control program copies this data set to the device memory via
@@ -49,7 +49,7 @@ Each scheme is applied as follows:
        need to perform data copies.
        However, this scheme must compromise the latency of data access
        imposed on the GPU when executing the control algorithm.
- \item Similarly to the {\hp} scheme, the {\dm} scheme proposed in this
+ \item Similarly to the {\hp} scheme, the {\dm} scheme presented in this
        paper uses pinned PCI-mapped host memory space to allocate the
        input and out buffers, and further maps it to the device memory
        through PCI BAR space.
@@ -68,7 +68,7 @@ The input and output modules are configured to write the input data to
 and read the output data from the specified PCI regions through DMA,
 respectively.
 These PCI regions are directly mapped to the device memory space
-allocated by the control system, using the {\dm} scheme proposed in this
+allocated by the control system, using the {\dm} scheme presented in this
 paper.
 In consequence, once the input and output modules are configured, and
 the device program is launched at the beginning, the algorithm can keep
@@ -87,6 +87,11 @@ algorithm execution and the latency of data transfer in this control
 system.
 Figure~\ref{fig:eval_plasma} shows the result of experiments conducted
 under the three different schemes, respectively.
+The values of the algorithm cycle and the data transfer are measured
+individually.
+We estimate that the {\dm} and the {\hd} schemes should have the same
+algorithm cycle, while the the {\dm} and the {\hp} schemes should
+have the same data latency, by nature.
 The {\dm} scheme achieves the highest rate in both algorithm
 execution and data transfer.
 The remaining two schemes, on the other hand, compromise one or the
@@ -104,7 +109,7 @@ the control system.
 We suspect that this latency comes from some interactions among the host
 computer, the graphics card, and the I/O modules.
 Lessons learned from this evaluation are summarized as follows:
-\begin{itemize}
+\begin{itemize} \itemsep1pt
  \item Zero-copy I/O processing is very effective for this control
        system, reducing the latency of data transfer from $16\mu$s to
        $4\mu$s.
