@@ -1,0 +1,35 @@
+\section{Related Work}
+\label{sec:related_work}
+
+Recent GPU architectures~\cite{NVIDIA_Fermi, NVIDIA_Kepler} support
+unified virtual addressing (UVA), which creates a single address space
+for the host memory and multiple instances of the device memory.
+In particular, NVIDIA GPUs and CUDA provides the {\tt cuMemcpyPeer()}
+function to copy data directly between GPUs over the PCIe bus without
+the involvement of the CPU or the host memory.
+Yet, it is restricted for use between NVIDIA GPUs.
+
+GPUDirect~\cite{GPUDirect} and its variant are vendor-specific
+proprietary products to directly 
+connect the GPU and the InfiniBand network card.
+They may use a similar approach to zero-copy I/O processing presented in
+this paper, but are not applicable to arbitrary I/O devices.
+Their architectures are also not open to the public.
+
+CGCM~\cite{Jablin_PLDI11} is an automatic system for optimizing CPU-GPU
+communication.
+It uses compiler modifications in conjunction with a runtime library to
+manipulate the timing of events in a way that effectively reduces
+data transfer overhead.
+PTask~\cite{Rossbach_SOSP11} provides programming abstractions to use
+the GPU, which are supported by the OS.
+One aspect of PTask is the use of a data-flow model to
+minimize data communication between the host processor and the GPU. 
+RGEM~\cite{Kato_RTSS11} aims to bound blocking times by dividing data
+into chunks, since high-priority tasks may be blocked due to data
+transfer in real-time systems.
+This effectively creates preemption points to allow finer grained
+scheduling of GPU tasks to fully exploit the ability to concurrently
+copy data and execute code.
+All these prior work primarily focus on the existing data communication
+basis, while we present new zero-copy I/O processing schemes.

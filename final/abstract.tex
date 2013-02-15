@@ -1,0 +1,22 @@
+\begin{abstract}
+ Cyber-physical systems (CPS) aim to monitor and control complex real-world
+ phenomena where the computational cost and real-time constraints could
+ be a major challenge.
+ Many-core hardware accelerators such as graphics processing units (GPUs)
+ promise to enhancing computation, leveraging the data parallelism often
+ found in real-world scenarios of CPS, but performance is limited by the
+ overhead of the data transfer between the host and the device memory.
+ For example, plasma control in the HBT-EP Tokamak device at
+ Columbia University~\cite{Maurer_PPCF11,Rath_FED12} must execute the
+ control algorithm in a few microseconds, but may take tens of
+ microseconds to copy the data set between the host and the device
+ memory.
+ This paper presents a zero-copy I/O processing scheme that maps
+ the I/O address space of the system to the virtual address space of the
+ compute device, allowing sensors and actuators to transfer data to and
+ from the compute device directly. 
+ Experiments using the plasma control system show a 33\% reduction in
+ computational cost, and microbenchmarks with more generic matrix 
+ operations show a 34\% reduction, while in both cases, effective data 
+ throughput remains at least as good as the current best  performers.
+\end{abstract}

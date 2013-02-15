@@ -1,0 +1,80 @@
+\section{System Implementation}
+\label{sec:implementation}
+
+GPU programs often execute in \textit{virtual address spaces}.
+In CUDA programming, for instance, a device pointer acquired by the
+memory allocation API functions, such as {\tt cuMemAlloc()} and {\tt
+cuMemAllocHost()}, represents a virtual address.
+The relevant data-copy API functions, such as {\tt cuMemcpyHtoD()} and {\tt
+cuMemcpyDtoH()}, also use this pointer to the virtual address rather
+than a physical address.
+As long as the programs remain within the GPU or the CPU, this is a
+suitable addressing model.
+However, CPS applications often require I/O devices for sensing and
+actuation.
+The current software stack and the API design of GPU programming force
+these applications to use the host memory as an intermediate buffer to
+bridge between the I/O device and the GPU.
+No prior system implementation has allowed data to move directly between
+them. 
+
+In this section, we present our system implementation of the {\dm} and
+{\dmh} schemes using Gdev~\cite{Kato_ATC12}, an open-source facility of
+the device driver and the runtime library for NVIDIA GPUs.
+A key limitation is that the data access of I/O devices is limited to
+the I/O address space.
+However, because the GPU is typically connected to the system via the
+PCIe bus, we can map the virtual address space of the device memory to
+the reserved I/O address space of the PCI bus, as mentioned in
+Section~\ref{sec:dm}.
+In this way, I/O devices can directly access data in the device memory.
+Specifically, their device drivers can configure their hardware direct
+memory access (DMA) engines to target the physical address associated
+with the PCI-mapped space of the device memory.
+
+Our system implementation adds the three functions presented in
+Section~\ref{sec:dm} to Gdev.
+While Gdev is a Linux kernel module for first-class GPU resource
+management, it also provides an implementation of the CUDA Driver
+API~\cite{CUDA} for user programming.
+The three functions are wrapped by the Gdev-original extended API
+functions, {\tt cuMemMap()}, {\tt cuMemUnmap()}, and {\tt
+cuMemGetPhysAddr()}, which are compatible to the form of the CUDA Driver
+API.
+We now provide the details of these functions:
+
+\begin{itemize} \itemsep1pt
+ \item \textbf{Mapping Memory:}
+       We assign the second PCIe BAR region, \textit{i.e.}, BAR1 (among
+       the five of those supported by hardware as a window of the device
+       memory), because this is the largest region, often equal to 128MB,
+       for NVIDIA GPUs.
+       Since these GPUs provide an MMIO register to point the PCIe BAR
+       to any virtual address of the device 
+       memory, we create special virtual address space dedicated to the
+       PCIe BAR when the system is loaded.
+       When the user context requests mapping of some device memory
+       object, we first find the physical pages allocated to this
+       memory object.
+       We next set up the page table of the GPU so that these
+       physical pages are referenced by the virtual address space
+       dedicated to the PCIe BAR.
+       Now, these physical pages are referenced by two virtual address
+       spaces: one dedicated to the PCIe BAR and the other associated
+       with the user context.
+       As a result, the data written to the PCIe BAR can be referenced
+       by the user context and the mapping is done.
+       If the user context furhter needs to map the same memory to the
+       host virtual address, we can use a Linux kernel primitive such as
+       {\tt ioremap()}.
+ \item \textbf{Unmapping Memory:}
+       To unmap the allocated space of the device memory from the PCIe
+       BAR, we simply delete the corresponding record of the page table.
+       If host memory is also mapped, we also call a Linux kernel
+       primitive such as {\tt iounmap()}.
+ \item \textbf{Getting Physical Address:}
+       The operating system kernel usually provides a function to return
+       the physical addresses of PCIe BARs.
+       In the Linux kernel, we can use {\tt pci\_resource\_start()} for
+       this purpose.
+\end{itemize}

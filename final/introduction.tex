@@ -1,0 +1,90 @@
+\section{Introduction}
+\label{sec:introduction}
+
+\begin{figure}[t]
+ \centering
+ \includegraphics[width=0.96\hsize]{eps/tokamak.eps}
+ \caption{Columbia's HBT-EP ``Tokamak''.}
+ \label{fig:tokamak}
+\end{figure}
+
+Cyber-physical systems (CPS) represent next generation networked and
+embedded systems, tightly coupled with computation and physical
+elements to control real-world phenomena.
+Their control algorithms, therefore, are becoming more and more complex,
+which distinguishes CPS from traditional safety-critical embedded
+systems in terms of the computational cost.
+In other words, ``real-fast'' (or really fast) is often as important as
+``real-time'' (or predictable) in CPS due to interaction speeds of the
+real world.
+This combined real-fast and real-time requirement of CPS imposes a
+core challenge on computer systems technology.
+
+Plasma control for fusion is an application of energy CPS where
+complex algorithms must run at a very high rate.
+Figure~\ref{fig:tokamak} shows the HBT-EP high-beta Tokamak device
+at Columbia University~\cite{Maurer_PPCF11,Rath_FED12}. It must
+process 96 inputs and 64 outputs of data in a few microseconds to
+magnetically control the 3-D magnetohydrodynamic instabilities. An idea
+was to parallelize the algorithm using the graphics processing unit
+(GPU) and CUDA~\cite{CUDA}, which is a well recognized set of parallel
+computing technology. However, GPU programming is currently not
+tailored to integrate sensor and actuator devices. This is due to the
+fact that the current GPU programming stack is completely independent
+of I/O device drivers. Since it can take tens of microseconds to
+transfer hundreds of bytes data between the CPU and the GPU, the state
+of the art is not adequate to apply the GPU for plasma control in
+real-time. This is a significant problem for not only plasma control
+but also any CPS applications that are augmented with compute devices.
+
+In order to effectively utilize GPUs for low-latency large-data CPS
+applications, platform systems are desired to provide a data
+communication scheme that can bypass the host computer, connecting GPUs
+and I/O devices directly.
+To the best of our knowledge, however, there is currently no
+standardized support for such a direct data transfer mechanism other than
+specialized commercial products for the InfiniBand
+network~\cite{GPUDirect}.
+The CUDA programming framework provides memory addressing technology
+that allows the GPU to directly access data allocated on the host for
+the purpose of mitigating the data transfer overhead, but this scheme is
+ill-suited for low-latency GPU computing due to the high cost of GPU's
+data access to the host memory.
+Given that GPUs are increasingly deployed in
+CPS applications~\cite{Hirabayashi_REACTION12, Mangharam11,
+McNaughton_ICRA11, Michel_IROS07}, and real-time GPU resource management
+techniques are starting to be developed \cite{Elliott_RTS12,
+Elliott_ECRTS12, Kato_RTAS11, Kato_RTSS11, Kato_ATC11, Kato_ATC12,
+Liu_PACT12}, it is time to look into a tighter integration of I/O
+processing and GPU computing.
+
+\textbf{Contribution:}
+This paper presents a new \emph{zero-copy} I/O processing scheme for GPU
+computing.
+This scheme allows I/O devices to directly transfer data to and from the
+GPU by mapping of memory and I/O address space.
+We investigate the problem of existing schemes for low-latency GPU
+computing, and demonstrate performance advantages of our zero-copy
+scheme with a case study using Columbia's Tokamak device.
+Experimental results show the clear benefit of our zero-copy scheme on
+the achievable latency.
+We also provide microbenchmarks to highlight more generic
+properties of the I/O processing schemes.
+By clarifying these capabilities, we aim to not only improve performance
+but also broaden the scope of CPS that can benefit from state-of-the-art
+parallel computing technology.
+
+\textbf{Organization:}
+The rest of this paper is organized as follows.
+Section~\ref{sec:system_model} describes the system model and
+assumptions behind this paper.
+Section~\ref{sec:io_processing} presents our zero-copy I/O processing
+scheme, and differentiates it from the existing schemes.
+Section~\ref{sec:implementation} describes details of system
+implementation.
+In Section~\ref{sec:case_study}, a case study of plasma control is
+provided to demonstrate the real-world impact of our contribution.
+Microbenchmarks are also used to evaluate more generic properties of the
+I/O processing schemes in Section~\ref{sec:benchmarking}.
+Section~\ref{sec:related_work} introduces related work, and this paper
+concludes in Section~\ref{sec:conclusion}.

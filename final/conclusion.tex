@@ -1,0 +1,28 @@
+\section{Conclusion}
+\label{sec:conclusion}
+
+In this paper, we have presented a new approach to GPU acceleration of
+low-latency CPS applications.
+This approach uses mapping of the device memory and the PCIe BAR
+region, and configures I/O devices to transfer data to and from the
+corresponding PCIe address space instead of the host main memory buffer
+space.
+The plasma control system, developed as an example of CPS applications,
+demonstrated that the presented zero-copy I/O processing scheme achieved
+a very high rate of $16\mu$s for full plasma control processing.
+The additional microbenchmarking evaluation also clarified an advantage
+of zero-copy I/O processing among those currently implementable for GPU
+computing. 
+We believe that the contribution of this paper would facilitate a
+grander vision of CPS using heterogeneous compute devices as well as
+GPUs.
+
+In future work, we extend the zero-copy I/O processing scheme for
+multiple contexts.
+This extension is essential in a sense that we can control multiple
+plants with a single GPU.
+A key challenge is to ensure exclusive direct access to the same memory
+space; device drivers and runtime libraries are not able intermediate
+during DMA transfers.
+We also plan to apply the same zero-copy scheme to arbitrary I/O devices
+such as Ethernet and Firewire.

@@ -1,0 +1,129 @@
+diff --git a/acknowledgement.tex b/acknowledgement.tex
+--- a/acknowledgement.tex
++++ b/acknowledgement.tex
+@@ -1,7 +1,4 @@
+ \section{Acknowlegdement}
+ 
+-We thank members of the HBT-EP Team at Columbia University for providing
+-us with knowledge of plasma and fusion use cases.
+-Figures 7, 8, 9, and 10 are provided by the HBT-EP Team.
+-This work is also supported in part by U.S. Department of Energy (DOE)
+-Grant DE-FG02-86ER53222.
++We thank the HBT-EP Team at Columbia University for providing figures
++7 to 10.
+diff --git a/case_study.tex b/case_study.tex
+--- a/case_study.tex
++++ b/case_study.tex
+@@ -2,15 +2,14 @@
+ \label{sec:case_study}
+ 
+ In this section, we provide a case study of magnetic control of
+-perturbed plasma equilibria using the HBT-EP Tokamak equipped with
++3-D plasma instabilities using the HBT-EP Tokamak equipped with
+ the GPU and the aforementioned I/O processing schemes.
+ This control system requires low latency and high computing capabilities
+ to achieve a sampling period of the order of ten microseconds, while
+ processing 96 inputs and 64 outputs of 16-bit data with a complex
+ algorithm.
+-As mentioned in Section~\ref{sec:introduction}, the CPU implementation
+-of this algorithm has never met the requirement of computing power.
+-The case study presented herein, therefore, is significant in that we look
++Implementing the algorithm on the CPU failed due to insufficient real-time
++performance. The case study presented herein, therefore, is significant in that we look
+ into a possibility of GPU implementations for the plasma control system.
+ 
+ \begin{figure}[t]
+@@ -26,8 +25,7 @@
+ The control input comes from a set of magnetic sensors through a D-TACQ
+ ACQ196 digitizer, and the resulting control signal is sent to two D-TACQ
+ AO32 analog output modules to excite control coils.
+-These input and output modules are connected to the NVIDIA Tesla C2050
+-GPU (448 cores and 4GB memory) upon the PCIe bus.
++These input and output modules are connected to the NVIDIA GTX 580 upon the PCIe bus.
+ We evaluate three schemes against this system architecture
+ from the viewpoint of the cycle time of algorithm execution and the
+ latency of data transfer. 
+@@ -58,7 +56,7 @@
+ \end{itemize}
+ 
+ This paper does not provide the details of the control
+-algorithm~\cite{Boozer_PP99}, which is outside the scope of this paper.
++algorithm which is outside the scope of this paper.
+ The outline of the control system implementation is that the host
+ program launches the device program on the GPU once at the beginning
+ when the system is loaded.
+@@ -132,7 +130,7 @@
+ \end{figure}
+ 
+ The above measurement explains that the control system can operate at a
+-sampling period of $16\mu$s.
++latency of $16\mu$s.
+ The data transfer from and to the input and output modules takes $4\mu$s
+ each.
+ The algorithm execution takes $4\mu$s.
+@@ -211,4 +209,4 @@
+ suppression.
+ As compared to no feedback scenario (``No FB'' in the figure), for
+ example, we find that we can suppress the strength of the rotating field
+-by up to 30\% for any mode observed in this experiment.
+\ No newline at end of file
++by up to 30\% for any mode observed in this experiment.
+diff --git a/introduction.tex b/introduction.tex
+--- a/introduction.tex
++++ b/introduction.tex
+@@ -20,25 +20,20 @@
+ 
+ Plasma control for fusion is an applications of energy CPS where
+ complex algorithms must run at a very high rate.
+-Figure~\ref{fig:tokamak} shows the HBT-EP high-beta ``Tokamak'' device at
+-Columbia University~\cite{Maurer_PPCF11,Rath_FED12}.
+-It must process 96 inputs and 64 outputs of data in a few microseconds
+-to magnetically control the 3-D perturbed equilibrium state of the
+-plasma~\cite{Boozer_PP99}.
+-An initial attempt at Columbia University employed fast cutting-edge
+-CPUs or FPGAs, but even a simplified algorithm failed to meet 20$\mu$s.
+-An alternative was to parallelize the algorithm using the
+-graphics processing unit (GPU) and CUDA~\cite{CUDA}, which is the most
+-successful parallel computing technology.
+-However, GPU programming is currently not tailored to integrate
+-sensor and actuator devices.
+-This is due to the fact that the current GPU programming stack is
+-completely independent of I/O device drivers.
+-Since it can take tens of microseconds to transfer hundreds of bytes
+-data between the CPU and the GPU, the state of the art is not adequate
+-to apply the GPU for plasma control in real-time.
+-This is a significant problem for not only plasma control but also any
+-CPS applications that are augmented with compute devices.
++Figure~\ref{fig:tokamak} shows the HBT-EP high-beta ``Tokamak'' device
++at Columbia University~\cite{Maurer_PPCF11,Rath_FED12}. It must
++process 96 inputs and 64 outputs of data in a few microseconds to
++magnetically control the 3-D magnetohydrodynamic instabilites. An idea
++was to parallelize the algorithm using the graphics processing unit
++(GPU) and CUDA~\cite{CUDA}, which is the most successful parallel
++computing technology. However, GPU programming is currently not
++tailored to integrate sensor and actuator devices. This is due to the
++fact that the current GPU programming stack is completely independent
++of I/O device drivers. Since it can take tens of microseconds to
++transfer hundreds of bytes data between the CPU and the GPU, the state
++of the art is not adequate to apply the GPU for plasma control in
++real-time. This is a significant problem for not only plasma control
++but also any CPS applications that are augmented with compute devices.
+ 
+ In order to effectively utilize the GPU for low-latency large-data CPS
+ applications, the system must support a direct communication scheme that
+@@ -70,7 +65,7 @@
+ computing, and demonstrate performance advantages of our zero-copy
+ scheme with a case study using Columbia's Tokamak device.
+ Experimental results show the clear benefit of our zero-copy scheme on
+-the plasma period.
++the achievable latency.
+ We also provide microbenchmarks to highlight more generic
+ properties of the I/O processing schemes.
+ By clarifying these capabilities, we aim to not only improve performance
+@@ -90,4 +85,4 @@
+ Microbenchmarks are also used to evaluate more generic properties of the
+ I/O processing schemes in Section~\ref{sec:benchmarking}.
+ Section~\ref{sec:related_work} introduces related work, and this paper
+-concludes in Section~\ref{sec:conclusion}.
+\ No newline at end of file
++concludes in Section~\ref{sec:conclusion}.
